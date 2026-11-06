@@ -49,10 +49,20 @@ route/
 
 ### Contract and schema
 
-- `contracts/openapi.yaml` is the source of truth for the API. Change it first, then implement. Backend interfaces and DTOs and frontend types are generated from it, and generated code is not committed.
+- `contracts/openapi.yaml` is the source of truth for the API. Change it first, then implement. Backend interfaces and DTOs are generated at build time and not committed. Frontend types are generated and committed (ADR-0006), so run `npm run types:generate` in `frontend/` after any contract change.
 - Flyway owns the schema, and Hibernate only validates it. Derived values, such as total packages, are never stored.
 - Errors are RFC 7807 `application/problem+json`.
 - The local database's host port comes from `POSTGRES_PORT` in `deploy/.env` (default `15432`). Never hardcode a host port: the backend datasource URL must read this variable with the same default. Testcontainers picks its own port and needs no configuration.
+
+## Frontend
+
+- All user-facing text lives in `frontend/src/messages.ts`. Components contain no string literals, and ESLint rejects literal text in JSX. Do not add an i18n library unless asked.
+- `src/api/schema.gen.d.ts` is generated. Never edit it by hand; `types:check` fails if it differs from the contract.
+- Never hardcode a host or port. Requests use the page's origin, and the Vite dev server proxies `/api` to `BACKEND_PORT`.
+- Never show text from the backend. Failures reach the screen only as stable problem codes and field names, which `messages.ts` turns into text.
+- Validation rules mirror the contract in `validation.ts`, and `validation.contract.test.ts` keeps them aligned. Change the contract first.
+- TypeScript is strict, with no `any`. Dependency versions are pinned exactly.
+- Use plain CSS and no UI framework. Forms need labels, `aria-invalid` and `aria-describedby` on errors, and focus on the first error after a failed submit.
 
 ## Naming
 
@@ -71,8 +81,8 @@ route/
 - Backend `*IT` classes run with Failsafe against PostgreSQL through Testcontainers. Never replace it with H2.
 - Tests that exercise the API send responses through `ContractValidator`, so they also fail if a response drifts from the contract.
 - Use JUnit 5 with AssertJ. Name test methods after behaviour, such as `rejectsNegativeKilometres`.
-- Frontend tests use Vitest and Testing Library, and assert what the user sees rather than implementation details.
-- Run `./mvnw verify` in `backend/` before calling backend work done. In `frontend/`, run lint, typecheck, test and build.
+- Frontend tests use Vitest and Testing Library, and assert what the user sees rather than implementation details. Mock the network with MSW, never the client module.
+- Run `./mvnw verify` in `backend/` before calling backend work done. In `frontend/`, run `lint`, `format:check`, `typecheck`, `test` and `build`.
 
 ## Commits
 
