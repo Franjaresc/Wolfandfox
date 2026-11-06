@@ -10,3 +10,4 @@ To add a record, copy [template.md](template.md) to `NNNN-short-title.md` and ad
 | [0002](0002-hexagonal-architecture-enforced-by-tests.md) | Hexagonal architecture enforced by tests | Accepted |
 | [0003](0003-contract-first-api-with-generated-code.md) | Contract-first API with generated code | Accepted |
 | [0004](0004-spring-boot-4.md) | Spring Boot 4 instead of 3.x | Accepted |
+| [0005](0005-strict-api-behaviour-and-contract-tests.md) | Strict API behaviour, verified against the contract | Accepted |

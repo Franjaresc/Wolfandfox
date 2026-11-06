@@ -69,6 +69,7 @@ route/
 
 - Backend `*Test` classes run with Surefire and need no Docker: domain, use cases with Mockito, MockMvc slices and ArchUnit.
 - Backend `*IT` classes run with Failsafe against PostgreSQL through Testcontainers. Never replace it with H2.
+- Tests that exercise the API send responses through `ContractValidator`, so they also fail if a response drifts from the contract.
 - Use JUnit 5 with AssertJ. Name test methods after behaviour, such as `rejectsNegativeKilometres`.
 - Frontend tests use Vitest and Testing Library, and assert what the user sees rather than implementation details.
 - Run `./mvnw verify` in `backend/` before calling backend work done. In `frontend/`, run lint, typecheck, test and build.
