@@ -1,6 +1,6 @@
 # ADR-0003: Contract-first API with generated code
 
-- **Status:** Accepted
+- **Status:** Accepted; partially superseded by [ADR-0006](0006-frontend-stack-and-generated-types.md), which commits the frontend's generated types
 - **Date:** 2026-11-06
 
 ## Context
