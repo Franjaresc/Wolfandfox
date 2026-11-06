@@ -33,7 +33,7 @@ docker compose up -d
 
 PostgreSQL is available on `localhost:15432`. To use another host port, change `POSTGRES_PORT` in `deploy/.env`.
 
-**2. Start the backend** on port 8080. On Windows, use `mvnw.cmd`.
+**2. Start the backend** on port 8080. On Windows, use `.\mvnw.cmd` instead of `./mvnw`.
 
 ```sh
 cd backend
