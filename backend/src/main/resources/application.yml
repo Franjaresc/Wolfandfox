@@ -13,6 +13,10 @@ spring:
     hibernate:
       # Flyway owns the schema. Hibernate only checks that the entities match it.
       ddl-auto: validate
+  # API messages are always English, whatever the machine's locale or the Accept-Language header.
+  web:
+    locale: en
+    locale-resolver: fixed
   # Hold JSON to what contracts/openapi.yaml declares, instead of Jackson's lenient defaults.
   jackson:
     default-property-inclusion: non_null

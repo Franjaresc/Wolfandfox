@@ -134,6 +134,15 @@ class RouteClosureControllerTest {
     }
 
     @Test
+    void validationMessagesAreEnglishWhateverTheRequestedLanguage() throws Exception {
+        var body = VALID_BODY.replace("\"kmDriven\":87", "\"kmDriven\":-1");
+
+        send(postBody(body).header("Accept-Language", "es"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("must be greater than or equal to 0"));
+    }
+
+    @Test
     void reportsEveryMissingRequiredField() throws Exception {
         send(postBody("{}"))
                 .andExpect(status().isBadRequest())
