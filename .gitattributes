@@ -1,0 +1,11 @@
+# Store and check out text as LF everywhere, so scripts such as mvnw run in CI.
+* text=auto eol=lf
+
+# Windows scripts need CRLF.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+*.jar binary
+*.png binary
+*.jpg binary
+*.ico binary

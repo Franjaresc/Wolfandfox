@@ -1,0 +1,29 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Java / Maven
+target/
+*.class
+hs_err_pid*
+
+# Node / frontend
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+frontend/src/api/generated/
+
+# Logs
+*.log
+
+# IDEs and OS files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local AI assistant settings (CLAUDE.md is shared and stays tracked)
+.claude/
