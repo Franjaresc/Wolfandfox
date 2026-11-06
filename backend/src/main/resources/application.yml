@@ -13,3 +13,11 @@ spring:
     hibernate:
       # Flyway owns the schema. Hibernate only checks that the entities match it.
       ddl-auto: validate
+  # Hold JSON to what contracts/openapi.yaml declares, instead of Jackson's lenient defaults.
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: true
+      accept-float-as-int: false
+    mapper:
+      allow-coercion-of-scalars: false
