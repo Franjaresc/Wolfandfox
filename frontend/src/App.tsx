@@ -1,4 +1,5 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router';
+import { RouteClosureDetailPage } from './features/route-closures/RouteClosureDetailPage';
 import { RouteClosureFormPage } from './features/route-closures/RouteClosureFormPage';
 import { RouteClosureListPage } from './features/route-closures/RouteClosureListPage';
 import { messages } from './messages';
@@ -20,6 +21,8 @@ export function App() {
           <Route path="/" element={<Navigate to="/closures" replace />} />
           <Route path="/closures" element={<RouteClosureListPage />} />
           <Route path="/closures/new" element={<RouteClosureFormPage />} />
+          <Route path="/closures/:id" element={<RouteClosureDetailPage />} />
+          <Route path="*" element={<p>{messages.app.notFound}</p>} />
         </Routes>
       </main>
     </>

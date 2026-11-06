@@ -21,6 +21,7 @@ export const messages = {
     navigation: 'Main',
     closeRoute: 'Close a route',
     closures: 'Route closures',
+    notFound: 'This page does not exist.',
   },
   common: {
     retry: 'Try again',
@@ -44,6 +45,12 @@ export const messages = {
       code: 'For example RT-0001.',
     },
     noNotes: 'None',
+    detail: {
+      title: 'Route closure',
+      loading: 'Loading route closure…',
+      notFound: 'We could not find this route closure. It may not exist.',
+      back: 'Back to route closures',
+    },
     list: {
       title: 'Route closures',
       filters: 'Filter route closures',

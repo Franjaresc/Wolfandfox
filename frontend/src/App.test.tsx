@@ -20,6 +20,12 @@ test('opens the list from the root path', async () => {
   expect(await screen.findByText(messages.closure.list.empty)).toBeInTheDocument();
 });
 
+test('says so when a path does not exist', () => {
+  renderApp('/nowhere');
+
+  expect(screen.getByText(messages.app.notFound)).toBeInTheDocument();
+});
+
 test('opens the form from its path', () => {
   renderApp('/closures/new');
 
