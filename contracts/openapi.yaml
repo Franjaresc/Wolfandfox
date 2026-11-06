@@ -46,6 +46,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
               example:
                 type: urn:wolfandfox:problem:duplicate-route-closure
+                code: ROUTE_CLOSURE_DUPLICATE
                 title: Route already closed
                 status: 409
                 detail: Route RT-0001 is already closed for 2026-01-15
@@ -126,6 +127,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
               example:
                 type: urn:wolfandfox:problem:route-closure-not-found
+                code: NOT_FOUND
                 title: Route closure not found
                 status: 404
                 detail: No route closure with id 00000000-0000-4000-8000-000000000001
@@ -141,6 +143,7 @@ components:
             $ref: '#/components/schemas/Problem'
           example:
             type: urn:wolfandfox:problem:internal-error
+            code: INTERNAL_ERROR
             title: Internal server error
             status: 500
             detail: An unexpected error occurred
@@ -152,6 +155,7 @@ components:
             $ref: '#/components/schemas/Problem'
           example:
             type: urn:wolfandfox:problem:validation-error
+            code: VALIDATION_FAILED
             title: Invalid request
             status: 400
             detail: One or more fields are invalid
@@ -308,12 +312,15 @@ components:
       type: object
       required:
         - type
+        - code
         - title
         - status
       properties:
         type:
           type: string
           format: uri
+        code:
+          $ref: '#/components/schemas/ProblemCode'
         title:
           type: string
         status:
@@ -329,6 +336,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FieldError'
+    ProblemCode:
+      description: >-
+        Stable, machine-readable error identifier. Clients map it to their own text instead of
+        showing `title` or `detail`.
+      type: string
+      enum:
+        - VALIDATION_FAILED
+        - ROUTE_CLOSURE_DUPLICATE
+        - NOT_FOUND
+        - REQUEST_NOT_SUPPORTED
+        - INTERNAL_ERROR
     FieldError:
       type: object
       required:

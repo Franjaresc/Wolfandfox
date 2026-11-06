@@ -78,6 +78,7 @@ class ConcurrentRouteClosureIT {
         assertThat(conflict.contentType()).isEqualTo("application/problem+json");
         assertThat(JsonPath.<String>read(conflict.body(), "$.type"))
                 .isEqualTo("urn:wolfandfox:problem:duplicate-route-closure");
+        assertThat(JsonPath.<String>read(conflict.body(), "$.code")).isEqualTo("ROUTE_CLOSURE_DUPLICATE");
         assertThat(conflict.body()).doesNotContainIgnoringCase("sql").doesNotContain("uq_route_closure");
     }
 }

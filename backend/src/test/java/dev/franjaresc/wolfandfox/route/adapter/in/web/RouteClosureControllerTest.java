@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -123,6 +124,7 @@ class RouteClosureControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(PROBLEM_JSON))
                 .andExpect(jsonPath("$.type").value("urn:wolfandfox:problem:validation-error"))
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
                 .andExpect(jsonPath("$.title").value("Invalid request"))
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.detail").value("One or more fields are invalid"))
@@ -224,6 +226,7 @@ class RouteClosureControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType(PROBLEM_JSON))
                 .andExpect(jsonPath("$.type").value("urn:wolfandfox:problem:duplicate-route-closure"))
+                .andExpect(jsonPath("$.code").value("ROUTE_CLOSURE_DUPLICATE"))
                 .andExpect(jsonPath("$.title").value("Route already closed"))
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.detail").value("Route RT-0001 is already closed for 2026-01-15"))
@@ -248,6 +251,7 @@ class RouteClosureControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(PROBLEM_JSON))
                 .andExpect(jsonPath("$.type").value("urn:wolfandfox:problem:route-closure-not-found"))
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"))
                 .andExpect(jsonPath("$.title").value("Route closure not found"))
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.detail", containsString(CLOSURE.id().value().toString())))
@@ -311,6 +315,7 @@ class RouteClosureControllerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().contentType(PROBLEM_JSON))
                 .andExpect(jsonPath("$.type").value("urn:wolfandfox:problem:internal-error"))
+                .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.detail").value("An unexpected error occurred"))
                 .andReturn();
 
@@ -337,7 +342,20 @@ class RouteClosureControllerTest {
         mvc.perform(post(URL).contentType(MediaType.TEXT_PLAIN).content("x"))
                 .andExpect(status().isUnsupportedMediaType())
                 .andExpect(content().contentType(PROBLEM_JSON))
-                .andExpect(jsonPath("$.status").value(415));
+                .andExpect(jsonPath("$.status").value(415))
+                .andExpect(jsonPath("$.code").value("REQUEST_NOT_SUPPORTED"));
+        mvc.perform(delete(URL))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(content().contentType(PROBLEM_JSON))
+                .andExpect(jsonPath("$.code").value("REQUEST_NOT_SUPPORTED"));
+    }
+
+    @Test
+    void anUnknownPathIsNotFoundWithACode() throws Exception {
+        mvc.perform(get("/api/v1/unknown"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(PROBLEM_JSON))
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
     }
 
     private static void assertRevealsNothingInternal(MvcResult result) throws Exception {

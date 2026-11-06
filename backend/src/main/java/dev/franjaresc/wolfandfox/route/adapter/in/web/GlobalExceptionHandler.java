@@ -1,5 +1,6 @@
 package dev.franjaresc.wolfandfox.route.adapter.in.web;
 
+import dev.franjaresc.wolfandfox.route.adapter.in.web.generated.model.ProblemCodeDto;
 import dev.franjaresc.wolfandfox.route.domain.DuplicateRouteClosureException;
 import dev.franjaresc.wolfandfox.route.domain.InvalidRouteClosureException;
 import dev.franjaresc.wolfandfox.route.domain.RouteClosureNotFoundException;
@@ -49,12 +50,22 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(DuplicateRouteClosureException.class)
     ProblemDetail handleDuplicate(DuplicateRouteClosureException exception) {
-        return problem(HttpStatus.CONFLICT, DUPLICATE, "Route already closed", exception.getMessage());
+        return problem(
+                HttpStatus.CONFLICT,
+                DUPLICATE,
+                ProblemCodeDto.ROUTE_CLOSURE_DUPLICATE,
+                "Route already closed",
+                exception.getMessage());
     }
 
     @ExceptionHandler(RouteClosureNotFoundException.class)
     ProblemDetail handleNotFound(RouteClosureNotFoundException exception) {
-        return problem(HttpStatus.NOT_FOUND, NOT_FOUND, "Route closure not found", exception.getMessage());
+        return problem(
+                HttpStatus.NOT_FOUND,
+                NOT_FOUND,
+                ProblemCodeDto.NOT_FOUND,
+                "Route closure not found",
+                exception.getMessage());
     }
 
     @ExceptionHandler(InvalidRouteClosureException.class)
@@ -76,6 +87,7 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 INTERNAL_ERROR,
+                ProblemCodeDto.INTERNAL_ERROR,
                 "Internal server error",
                 "An unexpected error occurred");
     }
@@ -125,6 +137,29 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return respond(exception, body, headers, request);
     }
 
+    /** Framework errors, such as 405 and 415, arrive here without a code of ours. */
+    @Override
+    protected ResponseEntity<Object> createResponseEntity(
+            Object body, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        if (body instanceof ProblemDetail problem && !hasCode(problem)) {
+            problem.setProperty("code", codeFor(status));
+        }
+        return super.createResponseEntity(body, headers, status, request);
+    }
+
+    private static boolean hasCode(ProblemDetail problem) {
+        return problem.getProperties() != null && problem.getProperties().containsKey("code");
+    }
+
+    private static ProblemCodeDto codeFor(HttpStatusCode status) {
+        if (status.is5xxServerError()) {
+            return ProblemCodeDto.INTERNAL_ERROR;
+        }
+        return status.isSameCodeAs(HttpStatus.NOT_FOUND)
+                ? ProblemCodeDto.NOT_FOUND
+                : ProblemCodeDto.REQUEST_NOT_SUPPORTED;
+    }
+
     private ResponseEntity<Object> respond(
             Exception exception, ProblemDetail body, HttpHeaders headers, WebRequest request) {
         return handleExceptionInternal(exception, body, headers, HttpStatus.BAD_REQUEST, request);
@@ -151,17 +186,20 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private static ProblemDetail validationProblem(String detail, List<FieldError> errors) {
-        var problem = problem(HttpStatus.BAD_REQUEST, VALIDATION_ERROR, "Invalid request", detail);
+        var problem = problem(
+                HttpStatus.BAD_REQUEST, VALIDATION_ERROR, ProblemCodeDto.VALIDATION_FAILED, "Invalid request", detail);
         problem.setProperty(
                 "errors",
                 errors.stream().sorted(Comparator.comparing(FieldError::field)).toList());
         return problem;
     }
 
-    private static ProblemDetail problem(HttpStatus status, URI type, String title, String detail) {
+    private static ProblemDetail problem(
+            HttpStatus status, URI type, ProblemCodeDto code, String title, String detail) {
         var problem = ProblemDetail.forStatusAndDetail(status, detail);
         problem.setType(type);
         problem.setTitle(title);
+        problem.setProperty("code", code);
         return problem;
     }
 }

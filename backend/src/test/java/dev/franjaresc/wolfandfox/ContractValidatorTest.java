@@ -9,6 +9,9 @@ class ContractValidatorTest {
 
     private static final String PATH = "/api/v1/route-closures/00000000-0000-4000-8000-000000000001";
     private static final String JSON = "application/json";
+    private static final String PROBLEM_JSON = "application/problem+json";
+    private static final String PROBLEM =
+            "{\"type\":\"urn:wolfandfox:problem:route-closure-not-found\",%s\"title\":\"x\",\"status\":404}";
     private static final String VALID_CLOSURE = """
             {"id":"00000000-0000-4000-8000-000000000001","routeCode":"RT-0001","closureDate":"2026-01-15",
             "vehicleCode":"VAN-0042","driverCode":"DRV-0007","packagesDelivered":42,"packagesFailed":3,
@@ -57,9 +60,29 @@ class ContractValidatorTest {
 
     @Test
     void detectsAProblemSentWithTheWrongContentType() {
-        var body = "{\"type\":\"urn:wolfandfox:problem:route-closure-not-found\",\"title\":\"x\",\"status\":404}";
+        var body = PROBLEM.formatted("\"code\":\"NOT_FOUND\",");
 
         assertThat(ContractValidator.violations("GET", PATH, 404, JSON, null, body)).isNotEmpty();
+    }
+
+    @Test
+    void detectsAProblemWithoutACode() {
+        assertThat(ContractValidator.violations("GET", PATH, 404, PROBLEM_JSON, null, PROBLEM.formatted("")))
+                .contains("code");
+    }
+
+    @Test
+    void detectsAProblemCodeTheContractDoesNotDeclare() {
+        var body = PROBLEM.formatted("\"code\":\"SOMETHING_ELSE\",");
+
+        assertThat(ContractValidator.violations("GET", PATH, 404, PROBLEM_JSON, null, body)).isNotEmpty();
+    }
+
+    @Test
+    void acceptsAProblemWithADeclaredCode() {
+        var body = PROBLEM.formatted("\"code\":\"NOT_FOUND\",");
+
+        assertThat(ContractValidator.violations("GET", PATH, 404, PROBLEM_JSON, null, body)).isEmpty();
     }
 
     @Test

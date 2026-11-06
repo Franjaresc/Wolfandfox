@@ -61,6 +61,7 @@ class RouteClosureApiIT {
         assertThat(second.contentType()).isEqualTo("application/problem+json");
         assertThat(JsonPath.<String>read(second.body(), "$.type"))
                 .isEqualTo("urn:wolfandfox:problem:duplicate-route-closure");
+        assertThat(JsonPath.<String>read(second.body(), "$.code")).isEqualTo("ROUTE_CLOSURE_DUPLICATE");
         assertThat(rowCount()).isEqualTo(1);
     }
 
