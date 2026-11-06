@@ -1,3 +1,10 @@
 spring:
   application:
     name: wolfandfox
+  # Local development reads the same file as docker compose. Environment variables take precedence.
+  config:
+    import: optional:file:../deploy/.env[.properties]
+  datasource:
+    url: jdbc:postgresql://localhost:${POSTGRES_PORT:15432}/${POSTGRES_DB:wolfandfox}
+    username: ${POSTGRES_USER:wolfandfox}
+    password: ${POSTGRES_PASSWORD:}
