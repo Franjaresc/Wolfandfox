@@ -49,6 +49,8 @@ paths:
                 title: Route already closed
                 status: 409
                 detail: Route RT-0001 is already closed for 2026-01-15
+        '500':
+          $ref: '#/components/responses/InternalError'
     get:
       tags: [RouteClosures]
       operationId: listRouteClosures
@@ -93,6 +95,8 @@ paths:
                 $ref: '#/components/schemas/RouteClosurePage'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /api/v1/route-closures/{id}:
     get:
       tags: [RouteClosures]
@@ -125,8 +129,21 @@ paths:
                 title: Route closure not found
                 status: 404
                 detail: No route closure with id 00000000-0000-4000-8000-000000000001
+        '500':
+          $ref: '#/components/responses/InternalError'
 components:
   responses:
+    InternalError:
+      description: Unexpected server error. The response never includes internal details.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: urn:wolfandfox:problem:internal-error
+            title: Internal server error
+            status: 500
+            detail: An unexpected error occurred
     BadRequest:
       description: The request is invalid
       content:
