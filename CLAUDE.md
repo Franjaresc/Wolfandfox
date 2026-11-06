@@ -52,6 +52,7 @@ route/
 - `contracts/openapi.yaml` is the source of truth for the API. Change it first, then implement. Backend interfaces and DTOs and frontend types are generated from it, and generated code is not committed.
 - Flyway owns the schema, and Hibernate only validates it. Derived values, such as total packages, are never stored.
 - Errors are RFC 7807 `application/problem+json`.
+- The local database's host port comes from `POSTGRES_PORT` in `deploy/.env` (default `15432`). Never hardcode a host port: the backend datasource URL must read this variable with the same default. Testcontainers picks its own port and needs no configuration.
 
 ## Naming
 

@@ -29,6 +29,8 @@ cp .env.example .env
 docker compose up -d
 ```
 
+PostgreSQL is available on `localhost:15432`. To use another host port, change `POSTGRES_PORT` in `deploy/.env`.
+
 ## Documentation
 
 - [Architecture Decision Records](docs/adr/README.md)
