@@ -7,6 +7,18 @@ Later phases, in rough priority order. None of this is implemented, and it isn't
 ### Authentication and authorization
 Issue and validate JWTs, add roles, and replace the stub behind `CurrentUserPort` with a real adapter. The use cases don't need to change, because the port is already the seam.
 
+### Security hardening
+Follows authentication, and covers:
+
+- JWT with roles, enforced on every endpoint.
+- Rate limiting at the gateway or API.
+- Security headers and strict CORS.
+- Dependency and secret scanning in CI.
+- A short threat model, including what is delegated to infrastructure, such as DDoS protection.
+
+### Frontend internationalization
+Translate the frontend into English and Spanish with react-i18next. Replace `src/messages.ts` with translation resources, and keep mapping the backend's stable problem codes to text.
+
 ### Events and reporting service
 Publish domain events such as "route closed" to Kafka, using a transactional outbox so that events and database writes stay consistent. Add a separate reporting service that consumes them. This would be the first real reason to extract a service from the monolith.
 
