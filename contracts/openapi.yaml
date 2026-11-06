@@ -1,0 +1,324 @@
+openapi: 3.0.3
+info:
+  title: Wolfandfox API
+  description: Courier back-office API. All example data is fictional.
+  version: 1.0.0
+servers:
+  - url: /
+tags:
+  - name: RouteClosures
+    description: End-of-day closures of delivery routes
+paths:
+  /api/v1/route-closures:
+    post:
+      tags: [RouteClosures]
+      operationId: closeRoute
+      summary: Close a route for the day
+      description: >-
+        Records the end-of-day result of a route. A route can be closed only once per date.
+        The server sets `closedBy` and `closedAt`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloseRouteRequest'
+      responses:
+        '201':
+          description: Route closed
+          headers:
+            Location:
+              description: URL of the new route closure
+              required: true
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteClosure'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: The route is already closed for that date
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                type: urn:wolfandfox:problem:duplicate-route-closure
+                title: Route already closed
+                status: 409
+                detail: Route RT-0001 is already closed for 2026-01-15
+    get:
+      tags: [RouteClosures]
+      operationId: listRouteClosures
+      summary: List route closures
+      description: >-
+        Returns closures ordered by closure date (newest first), then by route code.
+      parameters:
+        - name: date
+          in: query
+          description: Only closures for this date
+          schema:
+            type: string
+            format: date
+        - name: routeCode
+          in: query
+          description: Only closures for this exact route code
+          schema:
+            $ref: '#/components/schemas/Code'
+        - name: page
+          in: query
+          description: Zero-based page number
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          description: Page size
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: A page of route closures
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteClosurePage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/v1/route-closures/{id}:
+    get:
+      tags: [RouteClosures]
+      operationId: getRouteClosure
+      summary: Get a route closure
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The route closure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteClosure'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: No route closure has that id
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                type: urn:wolfandfox:problem:route-closure-not-found
+                title: Route closure not found
+                status: 404
+                detail: No route closure with id 00000000-0000-4000-8000-000000000001
+components:
+  responses:
+    BadRequest:
+      description: The request is invalid
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: urn:wolfandfox:problem:validation-error
+            title: Invalid request
+            status: 400
+            detail: One or more fields are invalid
+            errors:
+              - field: kmDriven
+                message: must be greater than or equal to 0
+  schemas:
+    Code:
+      description: Opaque business code in upper case, such as RT-0001
+      type: string
+      pattern: '^[A-Z0-9][A-Z0-9-]{1,19}$'
+      maxLength: 20
+      example: RT-0001
+    CloseRouteRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - routeCode
+        - closureDate
+        - vehicleCode
+        - driverCode
+        - packagesDelivered
+        - packagesFailed
+        - packagesReturned
+        - kmDriven
+      properties:
+        routeCode:
+          $ref: '#/components/schemas/Code'
+        closureDate:
+          type: string
+          format: date
+          example: '2026-01-15'
+        vehicleCode:
+          $ref: '#/components/schemas/Code'
+        driverCode:
+          $ref: '#/components/schemas/Code'
+        packagesDelivered:
+          type: integer
+          format: int32
+          minimum: 0
+          example: 42
+        packagesFailed:
+          type: integer
+          format: int32
+          minimum: 0
+          example: 3
+        packagesReturned:
+          type: integer
+          format: int32
+          minimum: 0
+          example: 1
+        kmDriven:
+          type: integer
+          format: int32
+          minimum: 0
+          example: 87
+        notes:
+          type: string
+          maxLength: 1000
+          example: Fictional note about the route
+    RouteClosure:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - routeCode
+        - closureDate
+        - vehicleCode
+        - driverCode
+        - packagesDelivered
+        - packagesFailed
+        - packagesReturned
+        - totalPackages
+        - kmDriven
+        - closedBy
+        - closedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        routeCode:
+          $ref: '#/components/schemas/Code'
+        closureDate:
+          type: string
+          format: date
+        vehicleCode:
+          $ref: '#/components/schemas/Code'
+        driverCode:
+          $ref: '#/components/schemas/Code'
+        packagesDelivered:
+          type: integer
+          format: int32
+          minimum: 0
+        packagesFailed:
+          type: integer
+          format: int32
+          minimum: 0
+        packagesReturned:
+          type: integer
+          format: int32
+          minimum: 0
+        totalPackages:
+          description: Delivered plus failed plus returned. Derived, never stored.
+          type: integer
+          format: int64
+          minimum: 0
+        kmDriven:
+          type: integer
+          format: int32
+          minimum: 0
+        notes:
+          type: string
+          maxLength: 1000
+        closedBy:
+          description: User who closed the route, set by the server
+          type: string
+          example: demo.supervisor
+        closedAt:
+          description: When the route was closed, set by the server
+          type: string
+          format: date-time
+    RouteClosurePage:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - page
+        - size
+        - totalElements
+        - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RouteClosure'
+        page:
+          type: integer
+          format: int32
+          minimum: 0
+        size:
+          type: integer
+          format: int32
+          minimum: 1
+        totalElements:
+          type: integer
+          format: int64
+          minimum: 0
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+    Problem:
+      description: RFC 7807 problem details
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+        errors:
+          description: Field-level errors, present on validation failures
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+    FieldError:
+      type: object
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+        message:
+          type: string
