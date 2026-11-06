@@ -8,3 +8,8 @@ spring:
     url: jdbc:postgresql://localhost:${POSTGRES_PORT:15432}/${POSTGRES_DB:wolfandfox}
     username: ${POSTGRES_USER:wolfandfox}
     password: ${POSTGRES_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      # Flyway owns the schema. Hibernate only checks that the entities match it.
+      ddl-auto: validate
