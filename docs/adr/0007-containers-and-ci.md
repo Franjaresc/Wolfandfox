@@ -27,8 +27,8 @@ Someone evaluating this project should be able to run it with one command, witho
 
 **Easier**
 
-- The project runs from a clone with only Docker installed.
-- CI tests the images and their wiring, not just the code.
+- The project is designed to run from a clone with only Docker installed.
+- The CI job tests the images and their wiring, not just the code.
 - Pinned versions make builds repeatable, and Dependabot keeps them from going stale.
 
 **Harder**

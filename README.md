@@ -31,6 +31,8 @@ docker compose up --build
 
 Open <http://localhost:8081>. To stop, press Ctrl+C. `docker compose down -v` also deletes the data.
 
+> **Status:** the container build is verified by the CI job, and its first run is pending.
+
 All host ports are bound to loopback. To change them, copy `deploy/.env.example` to `deploy/.env` and edit it.
 
 | Service | Default address |
@@ -106,7 +108,7 @@ Each has a record with its trade-offs and the alternatives rejected.
 | Spring Boot 4 | A new project shouldn't start with a migration already owed. | [ADR-0004](docs/adr/0004-spring-boot-4.md) |
 | Strict JSON, stable error codes | Bad input is rejected instead of guessed at. Real responses are checked against the contract in tests. | [ADR-0005](docs/adr/0005-strict-api-behaviour-and-contract-tests.md) |
 | Committed frontend types, no UI framework | The build fails on stale types. Three simple views don't justify a framework. | [ADR-0006](docs/adr/0006-frontend-stack-and-generated-types.md) |
-| Containers and CI | One-command run, and CI tests the images too. | [ADR-0007](docs/adr/0007-containers-and-ci.md) |
+| Containers and CI | Designed for a one-command run, with a CI job that tests the images too. | [ADR-0007](docs/adr/0007-containers-and-ci.md) |
 
 ## Testing strategy
 
@@ -119,7 +121,7 @@ Each has a record with its trade-offs and the alternatives rejected.
 | Concurrency | Testcontainers | Two simultaneous requests end in exactly one 201 and one 409. A barrier forces the race on every run. |
 | Architecture | ArchUnit | Dependency direction, and that JPA entities and repositories stay where they belong |
 | Frontend | Vitest, Testing Library, MSW | Validation, error handling and states, as a user sees them, with the network mocked at the HTTP boundary |
-| Full stack | `deploy/smoke-test.sh` in CI | The built images work together over HTTP |
+| Full stack | `deploy/smoke-test.sh` in CI | Built to prove that the images work together over HTTP. Pending its first CI run. |
 
 ## Develop locally
 
@@ -170,7 +172,7 @@ The full stack also uses port 8080 by default, so stop it first with `docker com
 
 ## Development approach
 
-This project was built with AI assistance, using Claude Code. The AI wrote most of the code and documentation. I set the scope and architecture, made the design decisions, reviewed the results at each checkpoint, and tested the application by hand. `CLAUDE.md` holds the conventions the assistant follows, and the decision records show the reasoning and trade-offs, which I can explain and defend.
+Implemented with Claude Code under my direction: I defined the requirements and design, and reviewed and approved every decision. `CLAUDE.md` holds the conventions the assistant follows, and the decision records show the reasoning and trade-offs, which I can explain and defend.
 
 ## Limitations and roadmap
 
@@ -179,7 +181,8 @@ This is a portfolio project and not production software:
 - **No authentication yet.** Every closure is recorded as a fixed fictional user, behind a port that is ready for a real one.
 - **The default database password is a public placeholder.** The setup is for local use only, with no HTTPS and no deployment.
 - **One use case.** A closure can't be edited or reopened, and vehicles and drivers are plain codes.
-- **No browser tests.** Rendering, phone layouts and keyboard use are checked by hand. Tests run in jsdom, which doesn't do layout.
+- **No browser tests.** Tests run in jsdom, which doesn't do layout, so rendering, phone layouts and keyboard use have no automated coverage. A manual check in a real browser is still pending.
+- **The container images are not yet confirmed to build.** See the note under [Run it](#run-it).
 - **Some tools are held back.** ESLint 9 is no longer supported upstream, because the accessibility plugin doesn't accept ESLint 10 yet. See [ADR-0006](docs/adr/0006-frontend-stack-and-generated-types.md).
 
 Next on the [roadmap](docs/backlog.md): authentication and security hardening, English and Spanish translations, Kafka events with a reporting service, file storage for proof of delivery, and observability.
