@@ -195,6 +195,7 @@ class RouteClosurePersistenceIT {
                 new Kilometres(87),
                 notes,
                 new UserId("demo.supervisor"),
-                Instant.parse("2026-01-15T18:30:00.123456Z"));
+                Instant.parse("2026-01-15T18:30:00.123456Z"),
+                date);
     }
 }

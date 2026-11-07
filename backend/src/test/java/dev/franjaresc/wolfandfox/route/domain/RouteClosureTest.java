@@ -20,7 +20,7 @@ class RouteClosureTest {
 
     @Test
     void closeRecordsAllValuesWithAFreshId() {
-        var closure = RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, "Fictional note", USER, NOW);
+        var closure = RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, "Fictional note", USER, NOW, DATE);
 
         assertThat(closure.id()).isNotNull();
         assertThat(closure.routeCode()).isEqualTo(ROUTE);
@@ -36,15 +36,15 @@ class RouteClosureTest {
 
     @Test
     void eachClosureGetsItsOwnId() {
-        var first = RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW);
-        var second = RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW);
+        var first = RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW, DATE);
+        var second = RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW, DATE);
 
         assertThat(first.id()).isNotEqualTo(second.id());
     }
 
     @Test
     void notesAreOptional() {
-        var closure = RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW);
+        var closure = RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW, DATE);
 
         assertThat(closure.notes()).isNull();
     }
@@ -53,7 +53,7 @@ class RouteClosureTest {
     void acceptsNotesAtTheMaximumLength() {
         var notes = "n".repeat(1000);
 
-        var closure = RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, notes, USER, NOW);
+        var closure = RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, notes, USER, NOW, DATE);
 
         assertThat(closure.notes()).hasSize(1000);
     }
@@ -62,21 +62,58 @@ class RouteClosureTest {
     void rejectsNotesOverTheMaximumLength() {
         var notes = "n".repeat(1001);
 
-        assertThatThrownBy(() -> RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, notes, USER, NOW))
+        assertThatThrownBy(() -> RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, notes, USER, NOW, DATE))
                 .isInstanceOf(InvalidRouteClosureException.class)
                 .hasMessageContaining("Notes");
     }
 
     @Test
     void rejectsMissingRequiredValue() {
-        assertThatThrownBy(() -> RouteClosure.close(null, DATE, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW))
+        assertThatThrownBy(() -> RouteClosure.close(null, DATE, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW, DATE))
                 .isInstanceOf(InvalidRouteClosureException.class)
                 .hasMessageContaining("Route code");
-        assertThatThrownBy(() -> RouteClosure.close(ROUTE, null, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW))
+        assertThatThrownBy(() -> RouteClosure.close(ROUTE, null, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW, DATE))
                 .isInstanceOf(InvalidRouteClosureException.class)
                 .hasMessageContaining("Closure date");
-        assertThatThrownBy(() -> RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, null, USER, null))
+        assertThatThrownBy(() -> RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, null, USER, null, DATE))
                 .isInstanceOf(InvalidRouteClosureException.class)
                 .hasMessageContaining("Closed at");
+        assertThatThrownBy(() -> RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW, null))
+                .isInstanceOf(InvalidRouteClosureException.class)
+                .hasMessageContaining("Today");
+    }
+
+    @Test
+    void acceptsClosingToday() {
+        var closure = RouteClosure.close(ROUTE, DATE, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW, DATE);
+
+        assertThat(closure.closureDate()).isEqualTo(DATE);
+    }
+
+    @Test
+    void acceptsClosingYesterday() {
+        var yesterday = DATE.minusDays(1);
+
+        var closure = RouteClosure.close(ROUTE, yesterday, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW, DATE);
+
+        assertThat(closure.closureDate()).isEqualTo(yesterday);
+    }
+
+    @Test
+    void rejectsClosingTomorrow() {
+        var tomorrow = DATE.plusDays(1);
+
+        assertThatThrownBy(() -> RouteClosure.close(ROUTE, tomorrow, VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW, DATE))
+                .isInstanceOf(ClosureDateInFutureException.class)
+                .isInstanceOf(InvalidRouteClosureException.class)
+                .hasMessageContaining("2026-01-16");
+    }
+
+    @Test
+    void storedClosuresAreNotRecheckedAgainstToday() {
+        var later = new RouteClosure(
+                RouteClosureId.newId(), ROUTE, DATE.plusDays(30), VEHICLE, DRIVER, PACKAGES, KM, null, USER, NOW);
+
+        assertThat(later.closureDate()).isEqualTo(DATE.plusDays(30));
     }
 }

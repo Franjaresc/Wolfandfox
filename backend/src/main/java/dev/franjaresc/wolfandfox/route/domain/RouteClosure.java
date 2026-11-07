@@ -37,7 +37,13 @@ public record RouteClosure(
         }
     }
 
-    /** Records a new closure with a fresh id. */
+    /**
+     * Records a new closure with a fresh id.
+     *
+     * @param today the current business date, from the caller's clock. Passing it in keeps the domain
+     *     deterministic and free of any clock or time zone.
+     * @throws ClosureDateInFutureException if the closure date is after today
+     */
     public static RouteClosure close(
             RouteCode routeCode,
             LocalDate closureDate,
@@ -47,7 +53,13 @@ public record RouteClosure(
             Kilometres kmDriven,
             String notes,
             UserId closedBy,
-            Instant closedAt) {
+            Instant closedAt,
+            LocalDate today) {
+        requirePresent(today, "Today");
+        // Only new closures are checked. A stored closure stays valid as the calendar moves on.
+        if (closureDate != null && closureDate.isAfter(today)) {
+            throw new ClosureDateInFutureException(closureDate, today);
+        }
         return new RouteClosure(
                 RouteClosureId.newId(),
                 routeCode,

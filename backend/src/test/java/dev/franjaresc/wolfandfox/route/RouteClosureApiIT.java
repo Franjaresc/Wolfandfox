@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.jayway.jsonpath.JsonPath;
 import dev.franjaresc.wolfandfox.ApiTestClient;
 import dev.franjaresc.wolfandfox.PostgresContainerConfig;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,6 +73,20 @@ class RouteClosureApiIT {
 
         assertThat(api.closeRoute(body("RT-0001", "2026-01-16")).status()).isEqualTo(201);
         assertThat(api.closeRoute(body("RT-0002", "2026-01-15")).status()).isEqualTo(201);
+    }
+
+    @Test
+    void theRealClockAllowsTodayAndRejectsTomorrow() throws Exception {
+        // The application's clock uses its default zone, UTC, in tests.
+        var today = LocalDate.now(ZoneOffset.UTC);
+
+        var tomorrow = api.closeRoute(body("RT-0001", today.plusDays(1).toString()));
+
+        assertThat(tomorrow.status()).isEqualTo(400);
+        assertThat(JsonPath.<String>read(tomorrow.body(), "$.code")).isEqualTo("VALIDATION_FAILED");
+        assertThat(JsonPath.<List<String>>read(tomorrow.body(), "$.errors[*].field")).containsExactly("closureDate");
+        assertThat(api.closeRoute(body("RT-0001", today.toString())).status()).isEqualTo(201);
+        assertThat(rowCount()).isEqualTo(1);
     }
 
     @Test

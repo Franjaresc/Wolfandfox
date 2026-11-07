@@ -1,6 +1,7 @@
 package dev.franjaresc.wolfandfox.route.adapter.in.web;
 
 import dev.franjaresc.wolfandfox.route.adapter.in.web.generated.model.ProblemCodeDto;
+import dev.franjaresc.wolfandfox.route.domain.ClosureDateInFutureException;
 import dev.franjaresc.wolfandfox.route.domain.DuplicateRouteClosureException;
 import dev.franjaresc.wolfandfox.route.domain.InvalidRouteClosureException;
 import dev.franjaresc.wolfandfox.route.domain.RouteClosureNotFoundException;
@@ -66,6 +67,12 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ProblemCodeDto.NOT_FOUND,
                 "Route closure not found",
                 exception.getMessage());
+    }
+
+    /** More specific than the handler below, so Spring picks it for this subclass. */
+    @ExceptionHandler(ClosureDateInFutureException.class)
+    ProblemDetail handleFutureDate(ClosureDateInFutureException exception) {
+        return validationProblem(INVALID_FIELDS, List.of(new FieldError("closureDate", "must not be in the future")));
     }
 
     @ExceptionHandler(InvalidRouteClosureException.class)

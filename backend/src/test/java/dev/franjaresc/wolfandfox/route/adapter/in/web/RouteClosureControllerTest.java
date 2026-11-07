@@ -24,6 +24,7 @@ import dev.franjaresc.wolfandfox.route.application.port.RouteClosureFilter;
 import dev.franjaresc.wolfandfox.route.application.port.in.CloseRouteUseCase;
 import dev.franjaresc.wolfandfox.route.application.port.in.FindRouteClosuresQuery;
 import dev.franjaresc.wolfandfox.route.application.port.in.GetRouteClosureQuery;
+import dev.franjaresc.wolfandfox.route.domain.ClosureDateInFutureException;
 import dev.franjaresc.wolfandfox.route.domain.DriverCode;
 import dev.franjaresc.wolfandfox.route.domain.DuplicateRouteClosureException;
 import dev.franjaresc.wolfandfox.route.domain.Kilometres;
@@ -70,7 +71,8 @@ class RouteClosureControllerTest {
             new Kilometres(87),
             null,
             new UserId("demo.supervisor"),
-            Instant.parse("2026-01-15T18:30:00.123456Z"));
+            Instant.parse("2026-01-15T18:30:00.123456Z"),
+            DATE);
 
     @Autowired
     private MockMvc mvc;
@@ -216,6 +218,25 @@ class RouteClosureControllerTest {
                 .andExpect(content().contentType(PROBLEM_JSON))
                 .andExpect(jsonPath("$.detail").value("The request body is missing or is not valid JSON"))
                 .andExpect(jsonPath("$.errors", hasSize(0)));
+    }
+
+    @Test
+    void aClosureDateInTheFutureIsAValidationErrorOnThatField() throws Exception {
+        when(closeRoute.close(any())).thenThrow(new ClosureDateInFutureException(DATE.plusDays(1), DATE));
+
+        var result = send(postBody(VALID_BODY))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(PROBLEM_JSON))
+                .andExpect(jsonPath("$.type").value("urn:wolfandfox:problem:validation-error"))
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.instance").value(URL))
+                .andExpect(jsonPath("$.errors", hasSize(1)))
+                .andExpect(jsonPath("$.errors[0].field").value("closureDate"))
+                .andExpect(jsonPath("$.errors[0].message").value("must not be in the future"))
+                .andReturn();
+
+        assertRevealsNothingInternal(result);
     }
 
     @Test

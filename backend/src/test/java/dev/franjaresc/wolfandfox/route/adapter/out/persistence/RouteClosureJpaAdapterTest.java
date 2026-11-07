@@ -31,7 +31,8 @@ class RouteClosureJpaAdapterTest {
             new Kilometres(87),
             null,
             new UserId("demo.supervisor"),
-            Instant.parse("2026-01-15T18:30:00Z"));
+            Instant.parse("2026-01-15T18:30:00Z"),
+            LocalDate.of(2026, 1, 15));
 
     private final RouteClosureJpaRepository repository = mock(RouteClosureJpaRepository.class);
     private final RouteClosureJpaAdapter adapter = new RouteClosureJpaAdapter(repository);

@@ -58,6 +58,7 @@ export interface components {
             routeCode: components["schemas"]["Code"];
             /**
              * Format: date
+             * @description The day being closed. Today or earlier; a date in the future is rejected with 400 and a field error on closureDate. "Today" is the server's business day, in its configured time zone.
              * @example 2026-01-15
              */
             closureDate: string;
@@ -176,7 +177,7 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
-        /** @description The request is invalid */
+        /** @description The request is invalid: a field breaks the contract, or a business rule rejects it, such as a closureDate in the future. Field errors name the field. */
         BadRequest: {
             headers: {
                 [name: string]: unknown;

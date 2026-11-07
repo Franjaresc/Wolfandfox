@@ -13,6 +13,7 @@ import dev.franjaresc.wolfandfox.route.domain.RouteClosure;
 import dev.franjaresc.wolfandfox.route.domain.RouteClosureId;
 import dev.franjaresc.wolfandfox.route.domain.RouteClosureNotFoundException;
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,8 @@ public class RouteClosureService implements CloseRouteUseCase, FindRouteClosures
     @Override
     @Transactional
     public RouteClosure close(CloseRouteCommand command) {
+        // One reading of the clock, so the closing time and today's date can never disagree.
+        var now = clock.instant();
         var closure = RouteClosure.close(
                 command.routeCode(),
                 command.closureDate(),
@@ -41,7 +44,9 @@ public class RouteClosureService implements CloseRouteUseCase, FindRouteClosures
                 command.notes(),
                 currentUser.currentUser(),
                 // PostgreSQL stores microseconds. Truncating keeps create and read responses identical.
-                clock.instant().truncatedTo(ChronoUnit.MICROS));
+                now.truncatedTo(ChronoUnit.MICROS),
+                // The clock's zone decides which calendar day "today" is.
+                LocalDate.ofInstant(now, clock.getZone()));
 
         // The database constraint is the real guarantee. This check only avoids a failed insert.
         if (repository.existsByRouteCodeAndClosureDate(closure.routeCode(), closure.closureDate())) {

@@ -6,6 +6,7 @@ import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import dev.franjaresc.wolfandfox.route.application.port.PageQuery;
@@ -14,6 +15,7 @@ import dev.franjaresc.wolfandfox.route.application.port.RouteClosureFilter;
 import dev.franjaresc.wolfandfox.route.application.port.in.CloseRouteUseCase.CloseRouteCommand;
 import dev.franjaresc.wolfandfox.route.application.port.out.CurrentUserPort;
 import dev.franjaresc.wolfandfox.route.application.port.out.RouteClosureRepositoryPort;
+import dev.franjaresc.wolfandfox.route.domain.ClosureDateInFutureException;
 import dev.franjaresc.wolfandfox.route.domain.DriverCode;
 import dev.franjaresc.wolfandfox.route.domain.DuplicateRouteClosureException;
 import dev.franjaresc.wolfandfox.route.domain.Kilometres;
@@ -113,6 +115,49 @@ class RouteClosureServiceTest {
     }
 
     @Test
+    void closeRejectsADateAfterTodayWithoutTouchingTheRepository() {
+        when(currentUser.currentUser()).thenReturn(USER);
+        var tomorrow = withDate(DATE.plusDays(1));
+
+        assertThatThrownBy(() -> service.close(tomorrow)).isInstanceOf(ClosureDateInFutureException.class);
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void closeAcceptsTodayAndEarlierDays() {
+        when(currentUser.currentUser()).thenReturn(USER);
+        when(repository.save(any())).then(returnsFirstArg());
+
+        assertThat(service.close(withDate(DATE)).closureDate()).isEqualTo(DATE);
+        assertThat(service.close(withDate(DATE.minusDays(1))).closureDate()).isEqualTo(DATE.minusDays(1));
+    }
+
+    @Test
+    void theClockZoneDecidesWhichDayIsToday() {
+        // 23:30 UTC on the 15th is already 01:30 on the 16th at UTC+2.
+        var lateEvening = Instant.parse("2026-01-15T23:30:00Z");
+        var utcService = new RouteClosureService(repository, currentUser, Clock.fixed(lateEvening, ZoneOffset.UTC));
+        var aheadService = new RouteClosureService(repository, currentUser, Clock.fixed(lateEvening, ZoneOffset.ofHours(2)));
+        when(currentUser.currentUser()).thenReturn(USER);
+        when(repository.save(any())).then(returnsFirstArg());
+        var sixteenth = withDate(DATE.plusDays(1));
+
+        assertThatThrownBy(() -> utcService.close(sixteenth)).isInstanceOf(ClosureDateInFutureException.class);
+        assertThat(aheadService.close(sixteenth).closureDate()).isEqualTo(DATE.plusDays(1));
+    }
+
+    private static CloseRouteCommand withDate(LocalDate date) {
+        return new CloseRouteCommand(
+                COMMAND.routeCode(),
+                date,
+                COMMAND.vehicleCode(),
+                COMMAND.driverCode(),
+                COMMAND.packages(),
+                COMMAND.kmDriven(),
+                COMMAND.notes());
+    }
+
+    @Test
     void getReturnsExistingClosure() {
         var closure = sampleClosure();
         when(repository.findById(closure.id())).thenReturn(Optional.of(closure));
@@ -150,6 +195,7 @@ class RouteClosureServiceTest {
                 new Kilometres(87),
                 null,
                 USER,
-                CLOCK.instant());
+                CLOCK.instant(),
+                DATE);
     }
 }

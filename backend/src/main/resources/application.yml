@@ -1,3 +1,7 @@
+# The time zone that defines the business day. Set it to where the routes run.
+wolfandfox:
+  time-zone: ${WOLFANDFOX_TIME_ZONE:UTC}
+
 # Container health checks use this. No other Actuator endpoint is exposed.
 management:
   endpoints:
