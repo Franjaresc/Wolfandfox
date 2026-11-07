@@ -13,3 +13,4 @@ To add a record, copy [template.md](template.md) to `NNNN-short-title.md` and ad
 | [0005](0005-strict-api-behaviour-and-contract-tests.md) | Strict API behaviour, verified against the contract | Accepted |
 | [0006](0006-frontend-stack-and-generated-types.md) | Frontend stack, committed types and testing approach | Accepted |
 | [0007](0007-containers-and-ci.md) | Containers and continuous integration | Accepted |
+| [0008](0008-business-dates-and-time-zones.md) | Business dates, time zones and date display | Accepted |
