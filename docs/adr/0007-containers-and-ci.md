@@ -21,7 +21,7 @@ Someone evaluating this project should be able to run it with one command, witho
 
 **CI has three jobs:** backend (`mvnw clean verify`), frontend (lint, format, typecheck, `types:check`, test, build) and full stack (builds the images, starts the stack and runs `deploy/smoke-test.sh` over HTTP). Actions are pinned to commit hashes, the token has only `contents: read`, and checkouts don't keep credentials.
 
-**Dependabot checks weekly** for Maven, npm, GitHub Actions, Docker and compose. It doesn't propose major versions for choices made on purpose: TypeScript, ESLint, Java 21, the Node line and PostgreSQL 16.
+**Dependabot checks weekly** for Maven, npm, GitHub Actions, Docker and compose. It doesn't propose major versions for choices made on purpose: TypeScript, ESLint, Java 21, the Node line and PostgreSQL 16. For nginx it doesn't propose minor versions either, because odd minor versions are mainline and this project stays on the stable line.
 
 ## Consequences
 

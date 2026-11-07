@@ -31,6 +31,7 @@ updates:
       interval: weekly
 
   # Java 21 and the Node version in .nvmrc are deliberate choices, so majors are not proposed.
+  # nginx uses odd minor versions for mainline, so only patches on the stable line are proposed.
   - package-ecosystem: docker
     directories:
       - /backend
@@ -42,6 +43,8 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: node
         update-types: [version-update:semver-major]
+      - dependency-name: nginxinc/nginx-unprivileged
+        update-types: [version-update:semver-minor]
 
   # PostgreSQL 16 is a deliberate choice, and the integration tests use the same major version.
   - package-ecosystem: docker-compose
