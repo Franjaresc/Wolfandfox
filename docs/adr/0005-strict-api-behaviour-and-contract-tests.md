@@ -11,7 +11,7 @@ Duplicate closures have a related problem. A concurrent request can pass the use
 
 ## Decision
 
-**Contract fidelity: validate real responses in tests.** `ContractValidator` uses `swagger-request-validator-core` to check responses against `contracts/openapi.yaml`. MockMvc tests and the HTTP integration tests pass every response through it, whatever else they assert. `ContractValidatorTest` proves that the validator can fail.
+**Contract fidelity: validate real responses in tests.** `ContractValidator` uses `openapi-request-validator-core` to check responses against `contracts/openapi.yaml`. MockMvc tests and the HTTP integration tests pass every response through it, whatever else they assert. `ContractValidatorTest` proves that the validator can fail.
 
 **Strict JSON.** Unknown fields, wrong types and coerced values are rejected with a 400. Most of this is configured in `application.yml`. Rejecting numbers and booleans as strings has no property, so `StrictJsonConfig` sets it. Null fields are omitted from responses, because the contract declares none as nullable.
 
@@ -31,7 +31,7 @@ Duplicate closures have a related problem. A concurrent request can pass the use
 - Validation covers only responses that tests exercise. An untested status code on an endpoint can still drift.
 - Adding a response field becomes a contract change first. Clients sending extra fields get a 400, so this API can't accept fields from a newer client.
 - Framework responses such as 405 and 415 use the problem format but aren't declared in the contract.
-- The validator adds a test-only dependency with its own Jackson 2 and Swagger parser. Version 2.46.1 is used because 3.0.0 has no jar on Maven Central.
+- The validator adds a test-only dependency with its own Jackson 2 and Swagger parser. Its messages vary by version and locale, so tests don't assert on their wording. Moving from `swagger-request-validator-core` 2.46.1 to these relocated coordinates at 3.0.0 exposed a real contract bug the older version missed: `instance` was declared as an absolute URI but sent as a relative path.
 - Identifying the duplicate relies on Hibernate's `ConstraintViolationException` exposing the name, and the name is repeated between the migration and the adapter. Tests against PostgreSQL fail if the two diverge.
 
 ## Alternatives considered

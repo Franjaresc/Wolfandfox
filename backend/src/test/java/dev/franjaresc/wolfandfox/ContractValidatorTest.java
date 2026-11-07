@@ -1,6 +1,7 @@
 package dev.franjaresc.wolfandfox;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,17 @@ class ContractValidatorTest {
             "packagesReturned":1,"totalPackages":46,"kmDriven":87,"closedBy":"demo.supervisor",
             "closedAt":"2026-01-15T18:30:00Z"%s}
             """;
+
+    /**
+     * The wording of a violation depends on the validator's version and the machine's locale, so this
+     * checks only that validation fails. The accepting tests here show that a matching body passes.
+     */
+    private static void assertRejected(int status, String contentType, String body) {
+        assertThatThrownBy(() -> ContractValidator.assertMatches("GET", PATH, status, contentType, null, body))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("GET")
+                .hasMessageContaining(PATH);
+    }
 
     @Test
     void acceptsAResponseThatMatchesTheContract() {
@@ -43,14 +55,31 @@ class ContractValidatorTest {
     void detectsAFieldOfTheWrongType() {
         var body = VALID_CLOSURE.formatted("").replace("\"kmDriven\":87", "\"kmDriven\":\"87\"");
 
-        assertThat(ContractValidator.violations("GET", PATH, 200, JSON, null, body)).contains("kmDriven");
+        assertRejected(200, JSON, body);
     }
 
     @Test
     void detectsAnUndeclaredNullValue() {
-        var body = VALID_CLOSURE.formatted(",\"notes\":null");
+        assertRejected(200, JSON, VALID_CLOSURE.formatted(",\"notes\":null"));
+    }
 
-        assertThat(ContractValidator.violations("GET", PATH, 200, JSON, null, body)).contains("notes");
+    @Test
+    void acceptsARelativeProblemInstance() {
+        var body = PROBLEM.formatted("\"code\":\"NOT_FOUND\",\"instance\":\"/api/v1/route-closures\",");
+
+        assertThat(ContractValidator.violations("GET", PATH, 404, PROBLEM_JSON, null, body)).isEmpty();
+    }
+
+    @Test
+    void detectsAProblemInstanceThatIsNotAUriReference() {
+        assertRejected(404, PROBLEM_JSON, PROBLEM.formatted("\"code\":\"NOT_FOUND\",\"instance\":\"/not a reference\","));
+    }
+
+    @Test
+    void detectsAProblemTypeThatIsNotAnAbsoluteUri() {
+        var body = "{\"type\":\"/relative/type\",\"code\":\"NOT_FOUND\",\"title\":\"x\",\"status\":404}";
+
+        assertRejected(404, PROBLEM_JSON, body);
     }
 
     @Test

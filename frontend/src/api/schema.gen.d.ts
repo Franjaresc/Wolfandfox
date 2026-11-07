@@ -139,7 +139,10 @@ export interface components {
             /** Format: int32 */
             status: number;
             detail?: string;
-            /** Format: uri */
+            /**
+             * Format: uri-reference
+             * @description The request path. RFC 7807 allows a relative reference here.
+             */
             instance?: string;
             /** @description Field-level errors, present on validation failures */
             errors?: components["schemas"]["FieldError"][];

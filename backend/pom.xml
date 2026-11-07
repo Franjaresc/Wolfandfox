@@ -19,7 +19,7 @@
     <properties>
         <java.version>21</java.version>
         <openapi-generator.version>7.27.0</openapi-generator.version>
-        <swagger-request-validator.version>2.46.1</swagger-request-validator.version>
+        <openapi-request-validator.version>3.0.0</openapi-request-validator.version>
         <archunit.version>1.5.1</archunit.version>
     </properties>
 
@@ -71,8 +71,8 @@
         </dependency>
         <dependency>
             <groupId>com.atlassian.oai</groupId>
-            <artifactId>swagger-request-validator-core</artifactId>
-            <version>${swagger-request-validator.version}</version>
+            <artifactId>openapi-request-validator-core</artifactId>
+            <version>${openapi-request-validator.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

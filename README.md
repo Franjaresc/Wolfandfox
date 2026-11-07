@@ -116,7 +116,7 @@ Each has a record with its trade-offs and the alternatives rejected.
 |---|---|---|
 | Domain and use cases | JUnit 5, Mockito, AssertJ | Invariants and business rules, with no framework or database |
 | Web | MockMvc | Status codes, validation and problem+json shape. No internal details leak. |
-| Contract | swagger-request-validator | Actual responses match `openapi.yaml`, on every API test |
+| Contract | openapi-request-validator | Actual responses match `openapi.yaml`, on every API test |
 | Persistence and end to end | Testcontainers, PostgreSQL 16 | Real SQL, migrations and constraints, and the whole application over HTTP |
 | Concurrency | Testcontainers | Two simultaneous requests end in exactly one 201 and one 409. A barrier forces the race on every run. |
 | Architecture | ArchUnit | Dependency direction, and that JPA entities and repositories stay where they belong |

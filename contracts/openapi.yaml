@@ -329,8 +329,9 @@ components:
         detail:
           type: string
         instance:
+          description: The request path. RFC 7807 allows a relative reference here.
           type: string
-          format: uri
+          format: uri-reference
         errors:
           description: Field-level errors, present on validation failures
           type: array
