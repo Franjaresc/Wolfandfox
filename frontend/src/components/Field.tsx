@@ -12,6 +12,7 @@ interface FieldProps {
   type?: HTMLInputTypeAttribute;
   inputMode?: 'numeric' | 'text';
   multiline?: boolean;
+  max?: string | undefined;
 }
 
 /** A labelled input whose hint and error are announced by assistive technology. */
@@ -27,6 +28,7 @@ export function Field({
   type = 'text',
   inputMode,
   multiline = false,
+  max,
 }: FieldProps) {
   const id = useId();
   const hintId = `${id}-hint`;
@@ -61,7 +63,7 @@ export function Field({
       {multiline ? (
         <textarea rows={3} {...shared} />
       ) : (
-        <input type={type} inputMode={inputMode} autoComplete="off" {...shared} />
+        <input type={type} inputMode={inputMode} max={max} autoComplete="off" {...shared} />
       )}
       {error === undefined ? null : (
         <p id={errorId} className="field-error">

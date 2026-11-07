@@ -82,7 +82,9 @@ export const messages = {
       closureDate: {
         required: 'Enter the closure date.',
         format: 'Enter a valid date.',
-        rejected: REJECTED,
+        future: 'The closure date cannot be in the future.',
+        // In practice the server rejects a date that passed here only when its "today" is earlier.
+        rejected: 'This date was not accepted. It cannot be later than today.',
       },
       vehicleCode: codeErrors('Enter the vehicle code.'),
       driverCode: codeErrors('Enter the driver code.'),

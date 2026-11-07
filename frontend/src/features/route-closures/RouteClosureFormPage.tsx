@@ -9,6 +9,7 @@ import {
   formFields,
   isFormField,
   liveTotal,
+  localToday,
   toRequest,
   validateField,
   validateForm,
@@ -48,6 +49,8 @@ export function RouteClosureFormPage() {
   const [failure, setFailure] = useState<ApiFailure | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState<RouteClosure | null>(null);
+  // Caps the date picker. Validation reads the date afresh, in case the page stays open past midnight.
+  const [today] = useState(localToday);
   // A new object on every failed submit, so focus moves again even if the same field is wrong.
   const [focusRequest, setFocusRequest] = useState<{ errors: FormErrors } | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -78,7 +81,7 @@ export function RouteClosureFormPage() {
   const setField = (field: FormField, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
     if (errors[field] !== undefined) {
-      setErrors((current) => ({ ...current, [field]: validateField(field, value) }));
+      setErrors((current) => ({ ...current, [field]: validateField(field, value, localToday()) }));
     }
   };
 
@@ -88,7 +91,7 @@ export function RouteClosureFormPage() {
       return;
     }
     setFailure(null);
-    const clientErrors = validateForm(values);
+    const clientErrors = validateForm(values, localToday());
     setErrors(clientErrors);
     if (Object.keys(clientErrors).length > 0) {
       setFocusRequest({ errors: clientErrors });
@@ -160,7 +163,7 @@ export function RouteClosureFormPage() {
       >
         <div className="form-grid">
           <Field {...fieldProps('routeCode')} required hint={text.hints.code} />
-          <Field {...fieldProps('closureDate')} required type="date" />
+          <Field {...fieldProps('closureDate')} required type="date" max={today} />
           <Field {...fieldProps('vehicleCode')} required hint={text.hints.code} />
           <Field {...fieldProps('driverCode')} required hint={text.hints.code} />
           <Field {...fieldProps('packagesDelivered')} required inputMode="numeric" />

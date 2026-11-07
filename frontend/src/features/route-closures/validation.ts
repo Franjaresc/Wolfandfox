@@ -28,7 +28,7 @@ export const formFields = [
 
 export type FormField = (typeof formFields)[number];
 export type FormValues = Record<FormField, string>;
-export type ValidationError = 'required' | 'format' | 'integer' | 'tooLarge' | 'tooLong';
+export type ValidationError = 'required' | 'format' | 'future' | 'integer' | 'tooLarge' | 'tooLong';
 /** 'rejected' means the server refused the field after it passed the checks here. */
 export type FieldError = ValidationError | 'rejected';
 export type FormErrors = Partial<Record<FormField, FieldError>>;
@@ -55,11 +55,25 @@ function validateCode(value: string): ValidationError | undefined {
   return isValidCode(value) ? undefined : 'format';
 }
 
-function validateDate(value: string): ValidationError | undefined {
+/**
+ * Today in the browser's own time zone, as YYYY-MM-DD. This is only a convenience for the person
+ * typing: the server's clock decides, and its zone may disagree near midnight.
+ */
+export function localToday(now: Date = new Date()): string {
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${String(now.getFullYear())}-${month}-${day}`;
+}
+
+function validateDate(value: string, today: string): ValidationError | undefined {
   if (value === '') {
     return 'required';
   }
-  return isValidDate(value) ? undefined : 'format';
+  if (!isValidDate(value)) {
+    return 'format';
+  }
+  // Both are YYYY-MM-DD, so comparing the strings compares the dates.
+  return value > today ? 'future' : undefined;
 }
 
 function validateInteger(value: string): ValidationError | undefined {
@@ -72,14 +86,18 @@ function validateInteger(value: string): ValidationError | undefined {
   return Number(value) > limits.integerMaximum ? 'tooLarge' : undefined;
 }
 
-export function validateField(field: FormField, value: string): ValidationError | undefined {
+export function validateField(
+  field: FormField,
+  value: string,
+  today: string,
+): ValidationError | undefined {
   switch (field) {
     case 'routeCode':
     case 'vehicleCode':
     case 'driverCode':
       return validateCode(value);
     case 'closureDate':
-      return validateDate(value);
+      return validateDate(value, today);
     case 'packagesDelivered':
     case 'packagesFailed':
     case 'packagesReturned':
@@ -90,10 +108,10 @@ export function validateField(field: FormField, value: string): ValidationError 
   }
 }
 
-export function validateForm(values: FormValues): FormErrors {
+export function validateForm(values: FormValues, today: string): FormErrors {
   const errors: FormErrors = {};
   for (const field of formFields) {
-    const error = validateField(field, values[field]);
+    const error = validateField(field, values[field], today);
     if (error !== undefined) {
       errors[field] = error;
     }

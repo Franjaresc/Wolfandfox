@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { MemoryRouter } from 'react-router';
-import { describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { messages } from '../../messages';
 import { BACKEND_TEXT, ROUTE_CLOSURES_URL, closure, problem } from '../../test/fixtures';
 import { server } from '../../test/server';
@@ -225,6 +225,68 @@ describe('validation', () => {
 
     expect(control('routeCode')).not.toHaveAttribute('aria-invalid');
     expect(screen.queryByText(fieldErrors.routeCode.required)).not.toBeInTheDocument();
+  });
+});
+
+describe('closure date', () => {
+  beforeEach(() => {
+    // Only Date is faked, so user-event's timers keep working.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 0, 15, 23, 30));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test('offers today, in local time, as the latest date', () => {
+    setup();
+
+    expect(control('closureDate')).toHaveAttribute('max', '2026-01-15');
+  });
+
+  test('rejects tomorrow with a clear message, without calling the backend', async () => {
+    let requests = 0;
+    server.use(
+      http.post(ROUTE_CLOSURES_URL, () => {
+        requests += 1;
+        return HttpResponse.json(closure(), { status: 201 });
+      }),
+    );
+    const user = setup();
+    await fill(user, { closureDate: '2026-01-16' });
+
+    await submit(user);
+
+    expectFieldError('closureDate', fieldErrors.closureDate.future);
+    expect(control('closureDate')).toHaveFocus();
+    expect(requests).toBe(0);
+  });
+
+  test('accepts today', async () => {
+    respondWith(() => HttpResponse.json(closure(), { status: 201 }));
+    const user = setup();
+    await fill(user, { closureDate: '2026-01-15' });
+
+    await submit(user);
+
+    expect(
+      await screen.findByRole('heading', { name: messages.closure.form.confirmation }),
+    ).toBeInTheDocument();
+  });
+
+  test('shows the date message when the server, whose clock decides, rejects the date', async () => {
+    respondWith(() => problem('VALIDATION_FAILED', 400, [{ field: 'closureDate' }]));
+    const user = setup();
+    await fill(user, { closureDate: '2026-01-15' });
+
+    await submit(user);
+
+    await waitFor(() => {
+      expect(control('closureDate')).toHaveFocus();
+    });
+    expectFieldError('closureDate', fieldErrors.closureDate.rejected);
+    expectNoBackendText();
   });
 });
 
