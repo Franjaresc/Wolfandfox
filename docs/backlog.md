@@ -29,7 +29,7 @@ Store photos in S3 or MinIO, with presigned URLs so that uploads and downloads b
 Add a single entry point for routing, rate limiting and token validation. It becomes worthwhile once there is more than one service.
 
 ### Observability
-Add structured logs, metrics and distributed tracing through OpenTelemetry, with health and readiness endpoints.
+Add structured logs, metrics and distributed tracing through OpenTelemetry, with readiness endpoints. A basic `/actuator/health` already exists for container health checks (ADR-0007).
 
 ### Dashboards
 Show operational views over the reporting data, such as delivery success rate and kilometres per route.

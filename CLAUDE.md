@@ -64,6 +64,15 @@ route/
 - TypeScript is strict, with no `any`. Dependency versions are pinned exactly.
 - Use plain CSS and no UI framework. Forms need labels, `aria-invalid` and `aria-describedby` on errors, and focus on the first error after a failed submit.
 
+## Containers and CI
+
+- `docker compose up --build` in `deploy/` runs the full stack. `docker compose up -d postgres` runs only the database for local development.
+- Both Dockerfiles build from the repository root, because both builds read the contract. Never bake a secret or `.env` file into an image.
+- Every host port is configurable through `deploy/.env` and bound to loopback.
+- Keep the Node version in `frontend/.nvmrc` and `frontend/Dockerfile` equal; CI fails otherwise.
+- Pin images to exact versions and actions to commit hashes. Only `/actuator/health` is exposed, and nginx forwards only `/api`.
+- Never claim CI is green without seeing the real run on GitHub.
+
 ## Naming
 
 - Input ports: `<Verb><Noun>UseCase`, or `<Find/Get><Noun>Query` for reads.
