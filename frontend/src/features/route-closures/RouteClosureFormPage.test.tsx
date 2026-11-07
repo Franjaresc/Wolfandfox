@@ -126,6 +126,7 @@ describe('validation', () => {
       test.each([
         ['a negative number', '-1'],
         ['a decimal', '1.5'],
+        ['a decimal such as 12.5, which the contract does not allow', '12.5'],
         ['letters', 'abc'],
         ['a sign', '+1'],
       ])('rejects %s', async (_name, value) => {

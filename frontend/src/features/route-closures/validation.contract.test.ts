@@ -5,6 +5,7 @@ import { parse } from 'yaml';
 import { formFields, limits } from './validation';
 
 interface Schema {
+  type?: string;
   pattern?: string;
   maxLength?: number;
   minimum?: number;
@@ -50,10 +51,12 @@ test('code rules match the contract', () => {
 });
 
 test.each(['packagesDelivered', 'packagesFailed', 'packagesReturned', 'kmDriven'])(
-  '%s has the limits the contract declares',
+  '%s has the type and limits the contract declares',
   (name) => {
     const schema = property(name);
 
+    // Whole numbers only. If the contract ever allows decimals, the form's rule must change too.
+    expect(schema.type).toBe('integer');
     expect(limits.integerMinimum).toBe(schema.minimum);
     expect(schema.format).toBe('int32');
     expect(limits.integerMaximum).toBe(2 ** 31 - 1);
