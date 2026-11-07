@@ -19,6 +19,8 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.ts'],
       restoreMocks: true,
+      // Times are shown in the viewer's zone, so tests fix it to get the same output everywhere.
+      env: { TZ: 'UTC' },
     },
   };
 });

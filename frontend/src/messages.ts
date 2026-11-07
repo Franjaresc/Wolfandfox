@@ -18,6 +18,8 @@ function integerErrors(required: string) {
 
 /** Every user-facing string. Components never contain text of their own, so i18n can be added later. */
 export const messages = {
+  /** The language of this text. Dates and times are formatted in it too. */
+  locale: 'en-GB',
   app: {
     title: 'Wolfandfox',
     navigation: 'Main',

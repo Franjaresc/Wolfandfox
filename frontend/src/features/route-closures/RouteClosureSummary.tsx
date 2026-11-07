@@ -1,13 +1,12 @@
+import { formatDate, formatDateTime } from '../../format';
 import { messages } from '../../messages';
 import type { RouteClosure } from './validation';
-
-const dateTime = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
 export function RouteClosureSummary({ closure }: { closure: RouteClosure }) {
   const labels = messages.closure.fields;
   const rows: [string, string | number][] = [
     [labels.routeCode, closure.routeCode],
-    [labels.closureDate, closure.closureDate],
+    [labels.closureDate, formatDate(closure.closureDate)],
     [labels.vehicleCode, closure.vehicleCode],
     [labels.driverCode, closure.driverCode],
     [labels.packagesDelivered, closure.packagesDelivered],
@@ -17,7 +16,7 @@ export function RouteClosureSummary({ closure }: { closure: RouteClosure }) {
     [labels.kmDriven, closure.kmDriven],
     [labels.notes, closure.notes ?? messages.closure.noNotes],
     [labels.closedBy, closure.closedBy],
-    [labels.closedAt, dateTime.format(new Date(closure.closedAt))],
+    [labels.closedAt, formatDateTime(closure.closedAt)],
   ];
 
   return (

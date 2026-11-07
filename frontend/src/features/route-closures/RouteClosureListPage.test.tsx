@@ -138,7 +138,7 @@ describe('results', () => {
     const link = await screen.findByRole('link', { name: 'RT-0001' });
     expect(link).toHaveAttribute('href', `/closures/${closure().id}`);
     const row = within(screen.getByRole('table')).getAllByRole('row')[1];
-    expect(row).toHaveTextContent('2026-01-15');
+    expect(row).toHaveTextContent('15 Jan 2026');
     expect(row).toHaveTextContent('VAN-0042');
     expect(row).toHaveTextContent('DRV-0007');
     expect(row).toHaveTextContent('46');

@@ -5,6 +5,7 @@ import { callApi } from '../../api/problems';
 import { useApiResource } from '../../api/useApiResource';
 import { ErrorNotice } from '../../components/ErrorNotice';
 import { Field } from '../../components/Field';
+import { formatDate } from '../../format';
 import { failureMessage, messages } from '../../messages';
 import { isValidCode, isValidDate, limits } from './validation';
 
@@ -221,7 +222,7 @@ export function RouteClosureListPage() {
                     <td>
                       <Link to={`/closures/${closure.id}`}>{closure.routeCode}</Link>
                     </td>
-                    <td>{closure.closureDate}</td>
+                    <td>{formatDate(closure.closureDate)}</td>
                     <td>{closure.vehicleCode}</td>
                     <td>{closure.driverCode}</td>
                     <td className="number">{closure.totalPackages}</td>

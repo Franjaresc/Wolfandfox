@@ -28,6 +28,16 @@ test('shows a loading state, then the closure', async () => {
   expect(screen.getByText('demo.supervisor')).toBeInTheDocument();
 });
 
+test('shows the closure date and closing time in one consistent format', async () => {
+  respondWith(() => HttpResponse.json(closure()));
+
+  renderApp(PATH);
+
+  expect(await screen.findByText('15 Jan 2026')).toBeInTheDocument();
+  expect(screen.getByText('15 Jan 2026, 18:30')).toBeInTheDocument();
+  expect(screen.queryByText('2026-01-15')).not.toBeInTheDocument();
+});
+
 test('asks for the id in the path', async () => {
   let requestedId: unknown;
   server.use(
