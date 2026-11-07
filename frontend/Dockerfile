@@ -9,7 +9,8 @@ COPY frontend/ ./
 RUN npm run build
 
 # This image runs nginx as a non-root user, listening on 8080.
-FROM nginxinc/nginx-unprivileged:1.31.7-alpine
+# It stays on nginx's stable line (even minor version) on purpose, not mainline.
+FROM nginxinc/nginx-unprivileged:1.30.6-alpine
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /workspace/frontend/dist /usr/share/nginx/html
 EXPOSE 8080
