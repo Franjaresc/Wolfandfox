@@ -11,6 +11,12 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 import jakarta.persistence.Entity;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +60,21 @@ class ArchitectureTest {
                     .or(equivalentTo(Transactional.class))
                     .or(equivalentTo(Propagation.class))
                     .or(equivalentTo(Isolation.class)));
+
+    /**
+     * Business rules such as "no closures in the future" depend on today's date, so the domain and use
+     * cases must get time from the injected Clock. Calls such as LocalDate.now(clock) stay allowed.
+     */
+    @ArchTest
+    static final ArchRule domainAndApplicationNeverReadTheSystemClock = noClasses()
+            .that().resideInAnyPackage(DOMAIN, APPLICATION)
+            .should().callMethod(LocalDate.class, "now")
+            .orShould().callMethod(LocalDateTime.class, "now")
+            .orShould().callMethod(Instant.class, "now")
+            .orShould().callMethod(ZonedDateTime.class, "now")
+            .orShould().callMethod(OffsetDateTime.class, "now")
+            .orShould().callMethod(Clock.class, "systemUTC")
+            .orShould().callMethod(Clock.class, "systemDefaultZone");
 
     @ArchTest
     static final ArchRule adaptersDoNotDependOnEachOther = slices()

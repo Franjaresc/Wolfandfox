@@ -28,6 +28,7 @@ adapter.out.*  ──▶ application ──▶ domain
 - `adapter`: translates between the outside world and ports. Adapters never depend on each other.
 - `config`: Spring wiring. It is the only package that may see every layer.
 - Framework types such as Spring Data's `Page` or JPA entities never cross a port.
+- `domain` and `application` never read the system clock. Time comes from the injected `Clock`, whose zone defines the business day (ADR-0008).
 - ArchUnit tests enforce these rules. If a rule blocks you, fix the design rather than the rule.
 
 ### Package layout
