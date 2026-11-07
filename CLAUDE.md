@@ -72,6 +72,7 @@ route/
 - Keep the Node version in `frontend/.nvmrc` and `frontend/Dockerfile` equal; CI fails otherwise.
 - Pin images to exact versions and actions to commit hashes. Only `/actuator/health` is exposed, and nginx forwards only `/api`.
 - Never claim CI is green without seeing the real run on GitHub.
+- `.cmd` files are stored as LF in git and checked out as CRLF on Windows (see `.gitattributes`). Do not commit CRLF-stored files. If a bot PR does, run `git add --renormalize` in its own commit.
 
 ## Naming
 
