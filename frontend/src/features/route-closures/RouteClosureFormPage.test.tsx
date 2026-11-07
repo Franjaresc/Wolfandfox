@@ -7,6 +7,7 @@ import { messages } from '../../messages';
 import { BACKEND_TEXT, ROUTE_CLOSURES_URL, closure, problem } from '../../test/fixtures';
 import { server } from '../../test/server';
 import { RouteClosureFormPage } from './RouteClosureFormPage';
+import { limits } from './validation';
 
 const labels = messages.closure.fields;
 const fieldErrors = messages.closure.errors;
@@ -226,6 +227,38 @@ describe('validation', () => {
 
     expect(control('routeCode')).not.toHaveAttribute('aria-invalid');
     expect(screen.queryByText(fieldErrors.routeCode.required)).not.toBeInTheDocument();
+  });
+});
+
+describe('helper texts', () => {
+  test.each([
+    ['routeCode', 'RT-0001'],
+    ['vehicleCode', 'VAN-0001'],
+    ['driverCode', 'DRV-0001'],
+  ] as const)('%s shows the code rule and its own example, %s', (field, example) => {
+    setup();
+
+    const description = control(field).getAttribute('aria-describedby') ?? '';
+    expect(control(field)).toHaveAccessibleDescription(messages.closure.hints[field]);
+    expect(messages.closure.hints[field]).toContain(`For example ${example}.`);
+    expect(messages.closure.hints[field]).toContain('2 to 20 uppercase letters, digits or hyphens');
+    expect(description).not.toBe('');
+  });
+
+  test('every example matches the code pattern in the contract', () => {
+    const pattern = new RegExp(limits.codePattern);
+
+    for (const field of ['routeCode', 'vehicleCode', 'driverCode'] as const) {
+      const example = /For example (\S+)\./.exec(messages.closure.hints[field])?.[1] ?? '';
+      expect(example).toMatch(pattern);
+    }
+  });
+
+  test('the date and notes say what they accept', () => {
+    setup();
+
+    expect(control('closureDate')).toHaveAccessibleDescription(messages.closure.hints.closureDate);
+    expect(control('notes')).toHaveAccessibleDescription(messages.closure.hints.notes);
   });
 });
 

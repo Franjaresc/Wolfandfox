@@ -305,7 +305,9 @@ describe('filters', () => {
     await user.click(apply());
 
     expect(codeInput()).toHaveAttribute('aria-invalid', 'true');
-    expect(codeInput()).toHaveAccessibleDescription(messages.closure.errors.routeCode.format);
+    expect(codeInput()).toHaveAccessibleDescription(
+      expect.stringContaining(messages.closure.errors.routeCode.format),
+    );
     expect(codeInput()).toHaveFocus();
     expect(requests).toHaveLength(before);
   });

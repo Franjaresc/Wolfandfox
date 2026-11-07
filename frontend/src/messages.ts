@@ -1,7 +1,9 @@
 import type { ApiFailure, ProblemCode } from './api/problems';
 
+// Codes follow the contract's pattern ^[A-Z0-9][A-Z0-9-]{1,19}$.
 const CODE_FORMAT =
   'Use 2 to 20 uppercase letters, digits or hyphens, starting with a letter or digit.';
+const CODE_RULE = '2 to 20 uppercase letters, digits or hyphens.';
 const WHOLE_NUMBER = 'Enter a whole number, 0 or more.';
 const NUMBER_TOO_LARGE = 'This number is too large.';
 const REJECTED = 'This value was not accepted. Check it and try again.';
@@ -42,7 +44,11 @@ export const messages = {
       closedAt: 'Closed at',
     },
     hints: {
-      code: 'For example RT-0001.',
+      routeCode: `${CODE_RULE} For example RT-0001.`,
+      vehicleCode: `${CODE_RULE} For example VAN-0001.`,
+      driverCode: `${CODE_RULE} For example DRV-0001.`,
+      closureDate: 'Today or earlier.',
+      notes: 'Up to 1000 characters.',
     },
     noNotes: 'None',
     detail: {

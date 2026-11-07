@@ -95,6 +95,7 @@ function Filters({ date, routeCode, onApply }: FiltersProps) {
       <Field
         name="routeCode"
         label={messages.closure.fields.routeCode}
+        hint={messages.closure.hints.routeCode}
         value={draftCode}
         error={codeError ? messages.closure.errors.routeCode.format : undefined}
         onChange={(value) => {

@@ -162,10 +162,16 @@ export function RouteClosureFormPage() {
         onSubmit={(event) => void handleSubmit(event)}
       >
         <div className="form-grid">
-          <Field {...fieldProps('routeCode')} required hint={text.hints.code} />
-          <Field {...fieldProps('closureDate')} required type="date" max={today} />
-          <Field {...fieldProps('vehicleCode')} required hint={text.hints.code} />
-          <Field {...fieldProps('driverCode')} required hint={text.hints.code} />
+          <Field {...fieldProps('routeCode')} required hint={text.hints.routeCode} />
+          <Field
+            {...fieldProps('closureDate')}
+            required
+            type="date"
+            max={today}
+            hint={text.hints.closureDate}
+          />
+          <Field {...fieldProps('vehicleCode')} required hint={text.hints.vehicleCode} />
+          <Field {...fieldProps('driverCode')} required hint={text.hints.driverCode} />
           <Field {...fieldProps('packagesDelivered')} required inputMode="numeric" />
           <Field {...fieldProps('packagesFailed')} required inputMode="numeric" />
           <Field {...fieldProps('packagesReturned')} required inputMode="numeric" />
@@ -175,7 +181,12 @@ export function RouteClosureFormPage() {
           <span id="total-packages-label">{text.fields.totalPackages}</span>{' '}
           <output aria-labelledby="total-packages-label">{total ?? text.form.totalUnknown}</output>
         </p>
-        <Field {...fieldProps('notes')} multiline optionalLabel={text.form.optional} />
+        <Field
+          {...fieldProps('notes')}
+          multiline
+          optionalLabel={text.form.optional}
+          hint={text.hints.notes}
+        />
         <button type="submit" disabled={submitting}>
           {submitting ? text.form.submitting : text.form.submit}
         </button>
