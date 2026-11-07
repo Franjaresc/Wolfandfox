@@ -1,0 +1,53 @@
+version: 2
+
+updates:
+  - package-ecosystem: maven
+    directory: /backend
+    schedule:
+      interval: weekly
+    groups:
+      maven-minor-and-patch:
+        update-types: [minor, patch]
+
+  # TypeScript and ESLint are held back on purpose. See ADR-0006.
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: '@eslint/js'
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+
+  # Java 21 and the Node version in .nvmrc are deliberate choices, so majors are not proposed.
+  - package-ecosystem: docker
+    directories:
+      - /backend
+      - /frontend
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: eclipse-temurin
+        update-types: [version-update:semver-major]
+      - dependency-name: node
+        update-types: [version-update:semver-major]
+
+  # PostgreSQL 16 is a deliberate choice, and the integration tests use the same major version.
+  - package-ecosystem: docker-compose
+    directory: /deploy
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
