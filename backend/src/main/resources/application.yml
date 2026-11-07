@@ -1,3 +1,10 @@
+# Container health checks use this. No other Actuator endpoint is exposed.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
 spring:
   application:
     name: wolfandfox
