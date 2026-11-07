@@ -96,6 +96,18 @@ sequenceDiagram
     UI-->>User: Confirmation, or a message from our own text
 ```
 
+## Business rules
+
+The domain enforces these invariants. The contract, the form and the database repeat them where they can, as a first line of defence.
+
+- **Codes:** route, vehicle and driver codes are 2 to 20 uppercase letters, digits or hyphens, starting with a letter or digit.
+- **Counts:** packages delivered, failed and returned, and kilometres driven, are whole numbers, 0 or more.
+- **Total:** total packages is derived from the three counts and never stored.
+- **Notes:** optional, up to 1000 characters.
+- **One per day:** a route can be closed only once per date, even when two requests arrive at the same moment.
+- **No future dates:** the closure date is today or earlier. "Today" comes from the server's clock, in the zone set by `WOLFANDFOX_TIME_ZONE` (default UTC). See [ADR-0008](docs/adr/0008-business-dates-and-time-zones.md).
+- **Set by the server:** who closed the route and when.
+
 ## Key decisions
 
 Each has a record with its trade-offs and the alternatives rejected.
@@ -109,6 +121,7 @@ Each has a record with its trade-offs and the alternatives rejected.
 | Strict JSON, stable error codes | Bad input is rejected instead of guessed at. Real responses are checked against the contract in tests. | [ADR-0005](docs/adr/0005-strict-api-behaviour-and-contract-tests.md) |
 | Committed frontend types, no UI framework | The build fails on stale types. Three simple views don't justify a framework. | [ADR-0006](docs/adr/0006-frontend-stack-and-generated-types.md) |
 | Containers and CI | Designed for a one-command run, with a CI job that tests the images too. | [ADR-0007](docs/adr/0007-containers-and-ci.md) |
+| Business dates from an injected clock | "No future dates" needs a deterministic, configurable "today". | [ADR-0008](docs/adr/0008-business-dates-and-time-zones.md) |
 
 ## Testing strategy
 

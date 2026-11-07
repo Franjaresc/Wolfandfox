@@ -38,6 +38,5 @@ Show operational views over the reporting data, such as delivery success rate an
 
 Phase 1 deliberately doesn't decide these:
 
-- **Future closure dates:** should closing a route for a future date be rejected? That rule depends on which time zone defines "today".
 - **Vehicles and drivers:** they are opaque codes for now. Should they become bounded contexts of their own, with validated references?
 - **Correcting a closure:** a closure can't be edited or reopened yet. What should the correction flow be, and how should it be audited?
