@@ -1,6 +1,6 @@
 # The build context is the repository root, because the build checks types against the contract.
 # Keep the Node version equal to .nvmrc; CI fails if they differ.
-FROM node:26.13.0-alpine AS build
+FROM node:26.13.1-alpine AS build
 WORKDIR /workspace/frontend
 COPY frontend/package.json frontend/package-lock.json frontend/.npmrc ./
 RUN npm ci --no-audit --no-fund
